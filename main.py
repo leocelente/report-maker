@@ -9,7 +9,20 @@
 '''
 
 import re
+import sys
+import json
+import getopt
 
+HELP_MSG = """
+File Parser:
+    USAGE: ./main.py [OPTIONS] <log_file>
+    
+    OPTIONS:
+        -f  <filename>  :    File containing the line structure in json format
+    
+    EXAMPLE:
+        ./main.py -f my_line_structure.json my_log.log
+            """
 
 def make_regex(structure, separator):
     '''
@@ -17,6 +30,8 @@ def make_regex(structure, separator):
     '''
     regex = r""
     for key in structure:
+        if key =="separator":
+            continue
         # uses Python Named Group RegEx Extension: ?P<group name>
         regex = regex + \
             (r"(?P<" + key + ">{" + structure[key]+"})") + separator
@@ -54,19 +69,41 @@ def parse_file():
 
 
 if __name__ == "__main__":
-    filename = "test.log"
-    structure = {
-        "my_date": "date",
-        "my_int": "integer",
-        "my_float": "float",
-        "my_str": "str"
-    }
-    separator = ";"
-    line = "1-12-2021;123;-123.456;xa"
+    s_file = ""
+    args  = sys.argv[1:]
+    opts, args = getopt.getopt(args, "hf:i:")
+    for opt, arg in opts:
+        if opt in ("-f"):
+            s_file = arg
+        elif opt in ("-i"):
+            print("inline structures not implemented yet")
+            exit()
+        elif opt in ("-h"):
+            print(HELP_MSG)
+            exit()
+    if len(args) != 1:
+        print("No file to parse")
+        exit()
+    p_file = args[0]
+    print("Parsing: " + p_file)
+    print("Using: " + s_file)
 
-    parameters = extract_as_dict(line, structure, separator)
-    if parameters:
-            print("Extracted Data:")
-            print(parameters)
-        else:
-            print("Failed to parse")
+    with open(s_file, 'r') as myfile:
+        data=myfile.read()
+    structure = json.loads(data)
+
+    try:
+        separator = structure["separator"]
+    except KeyError as _:
+        print("No separator field found")
+        exit()
+        
+    with open(p_file, 'r') as myfile:
+        print("Extracted Data:")
+        for line in myfile:
+            parameters = extract_as_dict(line, structure, separator)
+            if parameters:
+                print(parameters)
+                # store data in a array to pass to matplotlib
+            else:
+                print("Failed to parse")
