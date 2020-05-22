@@ -26,7 +26,6 @@ with open(in_filename, 'r') as in_file:
     in_file.seek(file_top)
     with open(out_filename, 'a') as out_file:
         head_str = ",".join(headers)
-        print(head_str)
         out_file.write(head_str + '\n')
         for line in in_file:
             out_file.write(line.replace(separator, ','))
