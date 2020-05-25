@@ -38,7 +38,8 @@ class DataParser:
 
         match = re.match(self._regex_str, line)
         if match:
-            return match.groupdict()
+            return self.__cast(match.groupdict())
+        
         else:
             return None
 
@@ -69,10 +70,26 @@ class DataParser:
     def __regex_replace_data_types(self, regex):
         date_re = r"[\d]{1,2}\-[\d]{1,2}\-[\d]{4}"      # DD-MM-YYYY format date
         integer_re = r"[\-]?[\d]+"                      # signed integer
-        float_re = r"[\-][\d]+\.[\d]+"                  # signed float
+        float_re = r"[\-]?[\d]+\.[\d]+"                  # signed float
         str_re = r"[\w]+"                               # string
         regex = regex.replace(r"{date}", date_re)
         regex = regex.replace(r"{integer}", integer_re)
         regex = regex.replace(r"{float}", float_re)
         regex = regex.replace(r"{str}", str_re)
         return regex[0:-1] + r'$'                       # replace last separator with EOL
+
+    def __scast(self, var, to_type):
+        if(self._structure[to_type] == "integer"):
+            return int(var)
+        elif(self._structure[to_type] == "float"):
+            return float(var)
+        else:
+            return var
+
+    def __cast(self, g_dict):
+        new_dict = dict.copy(g_dict)
+        for field in g_dict.keys():
+            new_dict[field] = self.__scast(g_dict[field], field)
+        return new_dict
+                        
+                
