@@ -9,8 +9,9 @@ structure = {
     "separator": ";"
 }
 
-parser = DataParser(structure)
-
+# parser = DataParser(structure)
+# or
+parser = DataParser.from_json('my_line_structure.json')
 
 ## LINE PARSING
 line = "1-12-2021;123;-123.456;xa"
