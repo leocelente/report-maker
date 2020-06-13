@@ -3,22 +3,30 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 
-def browseLog(*args):
-    filename = filedialog.askopenfilename()
-    if not filename == "":
-        logFilename.set(filename)
 
-
-def addField():
-    pass
-
-def editField():
-    pass
-
-def removeField():
-    pass
 
 if __name__ == "__main__":
+
+    def browseLog(*args):
+        filename = filedialog.askopenfilename()
+        if not filename == "":
+            logFilename.set(filename)
+
+    def addField():
+        value = fieldString.get()
+        lbxFields.insert(0, value)
+
+    def editField():
+        index = lbxFields.curselection()
+        lbxFields.insert(index, fieldString.get())
+
+    def removeField():
+        value = lbxFields.curselection()
+        lbxFields.delete(value)
+
+    def parse():
+        pass
+
     root = Tk()
     # -- Window Options -- 
     root.geometry("800x600")
@@ -31,26 +39,28 @@ if __name__ == "__main__":
 
     # Variables
     tokenSeparator  = StringVar()
-    logFilename     = StringVar(value="<select log file>")
+    logFilename     = StringVar(value="<log file>")
     parserString    = StringVar()
     fieldString     = StringVar()
 
+    fields_list     = StringVar()
+    fields_list.set(())
+    
 
     # Component Creation
-    lblBrowse       = ttk.Label(content, text="", textvariable=logFilename)
+    lblBrowse       = ttk.Label(content,    textvariable=logFilename)
 
-    btnBrowse       = ttk.Button(content, text="Browse", command=browseLog)
+    btnBrowse       = ttk.Button(content, text="Browse",    command=browseLog)
 
-    lbxFields       = Listbox(content)
-    txtAddField    = ttk.Entry(content, textvariable=fieldString)
-    btnAddField     = ttk.Button(content, text="Add", \
-        command=lambda *args: lbxFields.insert(0, fieldString.get()))
-    btnRemField     = ttk.Button(content, text="Remove")
-    btnEdtField     = ttk.Button(content, text="Edit")
-    btnParse        = ttk.Button(content, text="Parse")
-    btnCancel       = ttk.Button(content, text="Cancel", command=root.destroy)
+    lbxFields       = Listbox(content,      listvariable=fields_list)
+    txtAddField     = ttk.Entry(content,    textvariable=fieldString)
+    btnAddField     = ttk.Button(content, text="Add",       command=addField)
+    btnRemField     = ttk.Button(content, text="Remove",    command=removeField)
+    btnEdtField     = ttk.Button(content, text="Edit",      command=editField)
+    btnParse        = ttk.Button(content, text="Parse",     command=parse)
+    btnCancel       = ttk.Button(content, text="Cancel",    command=root.destroy)
 
-    txtSeparator    = ttk.Entry(content, textvariable=tokenSeparator)
+    txtSeparator    = ttk.Entry(content,    textvariable=tokenSeparator)
 
 
     # Component Placement in grid
