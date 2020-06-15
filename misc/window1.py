@@ -17,18 +17,50 @@ if __name__ == "__main__":
         lbxFields.insert(0, value)
 
     def editField():
-        index = lbxFields.curselection()
+        index = int(lbxFields.curselection()[0])
         lbxFields.insert(index, fieldString.get())
+        lbxFields.delete(index+1)
+        
 
     def removeField():
-        value = lbxFields.curselection()
-        lbxFields.delete(value)
+        idx = lbxFields.curselection()
+        lbxFields.delete(idx)
+
+    def moveUp():
+        idx = lbxFields.curselection()[0]
+        if idx == 0:
+            return None
+        above = idx-1
+        abv_txt = lbxFields.get(above)
+        lbxFields.delete(above)
+        lbxFields.insert(idx, abv_txt)
+
+
+    def moveDn():
+        idx = lbxFields.curselection()[0]
+        if idx == lbxFields.size()-1:
+            return None
+        txt = lbxFields.get(idx)
+        lbxFields.delete(idx)
+        lbxFields.insert(idx+1, txt)
+
 
     def parse():
-        pass
+        fields = fields_list.get()[1:-1].split(',') # removes parantheses
+        if fields[1] == '':
+            fields = fields[:-1] # removes empty item when size is 1
+        output = dict()
+        for field in fields:
+            field = field[1:-1] # removes single quotes
+            name = field.split(':')[0]
+            datatype = field.split(':')[1]
+            output[name] = datatype
+        print(output)
+
+        
 
     root = Tk()
-    # -- Window Options -- 
+    # -- Window Options --  
     root.geometry("800x600")
     root.grid_columnconfigure(12)
     root.grid_rowconfigure(12)
@@ -42,19 +74,20 @@ if __name__ == "__main__":
     logFilename     = StringVar(value="<log file>")
     parserString    = StringVar()
     fieldString     = StringVar()
-
     fields_list     = StringVar()
-    fields_list.set(())
+    fields_list.set(('a:i', 'b:f', 'c:d'))
     
 
     # Component Creation
     lblBrowse       = ttk.Label(content,    textvariable=logFilename)
 
     btnBrowse       = ttk.Button(content, text="Browse",    command=browseLog)
-
-    lbxFields       = Listbox(content,      listvariable=fields_list)
-    txtAddField     = ttk.Entry(content,    textvariable=fieldString)
+    lbxFields       = Listbox(content,    selectmode="SINGLE", listvariable=fields_list)
+    txtAddField     = ttk.Entry(content,  textvariable=fieldString)
     btnAddField     = ttk.Button(content, text="Add",       command=addField)
+    btnMovDnField   = ttk.Button(content, text="Move Down", command=moveDn)
+    btnMovUpField   = ttk.Button(content, text="Move Up",   command=moveUp)
+
     btnRemField     = ttk.Button(content, text="Remove",    command=removeField)
     btnEdtField     = ttk.Button(content, text="Edit",      command=editField)
     btnParse        = ttk.Button(content, text="Parse",     command=parse)
@@ -70,10 +103,11 @@ if __name__ == "__main__":
     txtAddField.grid    (column=0, row=2)
     btnAddField.grid    (column=0, row=3)
     lbxFields.grid      (column=0, row=4)
-    btnEdtField.grid    (column=0, row=5)
-    btnRemField.grid    (column=0, row=6)
-    btnParse.grid       (column=0, row=7)
-    btnCancel.grid      (column=0, row=8)
+    btnMovUpField.grid  (column=1, row=4)
+    btnMovDnField.grid  (column=1, row=5)
+    btnEdtField.grid    (column=0, row=6)
+    btnRemField.grid    (column=0, row=7)
+    btnParse.grid       (column=0, row=8)
+    btnCancel.grid      (column=0, row=9)
 
     root.mainloop()
-
