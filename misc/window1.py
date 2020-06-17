@@ -2,6 +2,11 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import simpledialog
+
+import statistics
+from dataparser import DataParser
+
 
 
 
@@ -18,7 +23,8 @@ if __name__ == "__main__":
 
     def editField():
         index = int(lbxFields.curselection()[0])
-        lbxFields.insert(index, fieldString.get())
+        newStr = simpledialog.askstring(,title="Edit", prompt="New Value:")
+        lbxFields.insert(index, newStr)
         lbxFields.delete(index+1)
         
 
@@ -45,19 +51,45 @@ if __name__ == "__main__":
         lbxFields.insert(idx+1, txt)
 
 
-    def parse():
-        fields = fields_list.get()[1:-1].split(',') # removes parantheses
+    def dictFromListBox(strTupleFields):
+        fields = strTupleFields.get()[1:-1].split(',') # removes parantheses
         if fields[1] == '':
             fields = fields[:-1] # removes empty item when size is 1
         output = dict()
         for field in fields:
-            field = field[1:-1] # removes single quotes
+            field = field.strip().strip('\'') # removes spaces and single quotes
+            # print("field:", field)
             name = field.split(':')[0]
             datatype = field.split(':')[1]
             output[name] = datatype
-        print(output)
+        return output
 
+    def parse():
+        struct = dictFromListBox(fields_list)
+        struct["separator"] = tokenSeparator.get()
+        parser = DataParser(struct)
+        with open(logFilename.get(), 'r') as logfile:
+            testline = logfile.readline()
+            print(testline, struct)
+            data = parser.parse_line(testline)
+            if data == None:
+                print("Could not match line structure to the log's [first] line")
+                return None
+        all_data = parser.parse_file(logFilename.get())
+        generateStatistics(all_data)
         
+
+    def generateStatistics(all_data):
+        while(True):
+            strPlots = simpledialog.askstring(title="Graph", prompt="Graphs: (empty to stop)",)
+            if strPlots == '':
+                break
+            plots = strPlots.split(',')
+            print("\nplotting: ", plots)
+            g = statistics.generate_data_x_data(all_data[plots[0]], all_data[plots[1]], plots[0], plots[1])
+        print("end", g)
+
+
 
     root = Tk()
     # -- Window Options --  
@@ -70,12 +102,12 @@ if __name__ == "__main__":
     # frame = ttk.Frame(content, relief="sunken", width=800, height=600)
 
     # Variables
-    tokenSeparator  = StringVar()
+    tokenSeparator  = StringVar(value=";")
     logFilename     = StringVar(value="<log file>")
     parserString    = StringVar()
     fieldString     = StringVar()
     fields_list     = StringVar()
-    fields_list.set(('a:i', 'b:f', 'c:d'))
+    fields_list.set(('a:integer', 'b:float', 'c:str'))
     
 
     # Component Creation
@@ -90,6 +122,7 @@ if __name__ == "__main__":
 
     btnRemField     = ttk.Button(content, text="Remove",    command=removeField)
     btnEdtField     = ttk.Button(content, text="Edit",      command=editField)
+
     btnParse        = ttk.Button(content, text="Parse",     command=parse)
     btnCancel       = ttk.Button(content, text="Cancel",    command=root.destroy)
 
@@ -107,7 +140,8 @@ if __name__ == "__main__":
     btnMovDnField.grid  (column=1, row=5)
     btnEdtField.grid    (column=0, row=6)
     btnRemField.grid    (column=0, row=7)
-    btnParse.grid       (column=0, row=8)
-    btnCancel.grid      (column=0, row=9)
+    txtSeparator.grid   (column=0, row=8)
+    btnParse.grid       (column=0, row=9)
+    btnCancel.grid      (column=0, row=10)
 
     root.mainloop()
