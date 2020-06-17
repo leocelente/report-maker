@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     def editField():
         index = int(lbxFields.curselection()[0])
-        newStr = simpledialog.askstring(,title="Edit", prompt="New Value:")
+        newStr = simpledialog.askstring(title="Edit", prompt="New Value:")
         lbxFields.insert(index, newStr)
         lbxFields.delete(index+1)
         
